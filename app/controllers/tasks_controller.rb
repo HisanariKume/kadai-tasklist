@@ -2,6 +2,7 @@ class TasksController < ApplicationController
   
   before_action :set_task, only: [:show, :edit, :update, :destroy]
   before_action :require_user_logged_in, only: [:index, :show]
+  before_action :check_user, only:[:show,:edit,:update,:destroy]
 
   def index
     @user = User.find(session[:user_id])
@@ -18,8 +19,7 @@ class TasksController < ApplicationController
 
   def create
     @task = current_user.tasks.build(task_params)
-    #@task = Task.new(task_params)
-    #@task.user_id = current_user.user_id
+    
     if @task.save
       flash[:success]  = "Taskが正常に投稿されました"
       redirect_to @task
@@ -54,6 +54,13 @@ private
 
 def set_task
   @task = Task.find(params[:id])
+end
+
+#Redirection For dening illegal access
+def check_user
+  unless Task.find(params[:id]).user_id == session[:user_id]
+  redirect_to controller: 'users', action: 'show'
+  end
 end
 
 #Strong Parameter
